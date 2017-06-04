@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import csv
 
 class Contact:
     def __init__(self, name, phone, email):
@@ -13,15 +14,16 @@ class ContactBook:
     def add(self, name, phone, email):
         contact = Contact(name, phone, email)
         self._contacts.append(contact)
+        self._save()
 
     def delete(self, name):
         for idx, contact in enumerate(self._contacts):
             if contact.name.lower() == name.lower():
                 del self._contacts[idx]
+                self._save()
                 break
     
     def update_contact(self, contact):
-
         name = str(raw_input('Escribe el nuevo nombre del contacto: '))
         phone = str(raw_input('Escribe el nuevo teléfono del contacto: '))
         email = str(raw_input('Escribe el nuevo email del contacto: '))
@@ -29,7 +31,10 @@ class ContactBook:
         contact.name = name
         contact.phone = phone
         contact.email = email
-        self._print_contact(contact)
+        print('*********')
+        print('Contacto Guardado')
+        print('*********')
+        self._save()
 
     def update(self, name):
         for contact in self._contacts:
@@ -47,6 +52,14 @@ class ContactBook:
         else:
             self._not_found()
 
+    def _save(self):
+        with open('contact.csv', 'w')as f:
+            writer = csv.writer(f)
+            writer.writerow( ('name', 'phone', 'email') )
+
+            for contact in self._contacts:
+                writer.writerow( (contact.name, contact.phone, contact.email) )
+
     def show_all(self):
         for contact in self._contacts:
             self._print_contact(contact)
@@ -62,8 +75,16 @@ class ContactBook:
         print('*********')
         print('no encontramos el contacto')
         print('*********')
+
 def run():
     contact_book = ContactBook()
+
+    with open('contact.csv', 'r') as f:
+        reader = csv.reader(f)
+        for idx, row in enumerate(reader):
+            if idx == 0:
+                continue
+            contact_book.add(row[0], row[1], row[2])
 
     while True:
         command = str(raw_input('''
